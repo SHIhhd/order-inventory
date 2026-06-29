@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: order-inventory
+  #表示启动时加载： application.yml 和  application-dev.yml  就是 公共配置 + 开发环境配置
+  profiles:
+    active: dev
+
+server:
+  port: 8080
+
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+mybatis-plus:
+  #MyBatis-Plus XML 路径
+  mapper-locations: classpath*:/mapper/**/*.xml
+  #实体类别名包
+  type-aliases-package: com.example.orderinventory.*.entity
+
+  configuration:
+    #下划线转驼峰
+    map-underscore-to-camel-case: true
+    #SQL 日志输出  调用接口时，控制台能看到 SQL
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+  global-config:
+    #关闭 MyBatis-Plus 启动 Banner，让日志更干净。
+    banner: false
+    #逻辑删除配置  写的是 Java 实体类属性名，不是数据库字段名。
+    db-config:
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+logging:
+  level:
+    root: info
+    com.example.orderinventory: debug
+    com.example.orderinventory.product.mapper: debug
+    com.example.orderinventory.stock.mapper: debug
+    com.example.orderinventory.order.mapper: debug
