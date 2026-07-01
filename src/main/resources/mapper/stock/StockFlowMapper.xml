@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.orderinventory.stock.mapper.StockFlowMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.orderinventory.stock.entity.StockFlow">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="productId" column="product_id" jdbcType="BIGINT"/>
+            <result property="skuCode" column="sku_code" jdbcType="VARCHAR"/>
+            <result property="bizNo" column="biz_no" jdbcType="VARCHAR"/>
+            <result property="bizType" column="biz_type" jdbcType="TINYINT"/>
+            <result property="changeQuantity" column="change_quantity" jdbcType="INTEGER"/>
+            <result property="beforeQuantity" column="before_quantity" jdbcType="INTEGER"/>
+            <result property="afterQuantity" column="after_quantity" jdbcType="INTEGER"/>
+            <result property="operatorId" column="operator_id" jdbcType="BIGINT"/>
+            <result property="operatorType" column="operator_type" jdbcType="TINYINT"/>
+            <result property="remark" column="remark" jdbcType="VARCHAR"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
+            <result property="version" column="version" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,product_id,sku_code,
+        biz_no,biz_type,change_quantity,
+        before_quantity,after_quantity,operator_id,
+        operator_type,remark,create_time,
+        update_time,is_deleted,version
+    </sql>
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.orderinventory.order.mapper.OrderItemMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.orderinventory.order.entity.OrderItem">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="orderId" column="order_id" jdbcType="BIGINT"/>
+            <result property="orderNo" column="order_no" jdbcType="VARCHAR"/>
+            <result property="productId" column="product_id" jdbcType="BIGINT"/>
+            <result property="skuCode" column="sku_code" jdbcType="VARCHAR"/>
+            <result property="productName" column="product_name" jdbcType="VARCHAR"/>
+            <result property="salePrice" column="sale_price" jdbcType="BIGINT"/>
+            <result property="quantity" column="quantity" jdbcType="INTEGER"/>
+            <result property="itemAmount" column="item_amount" jdbcType="BIGINT"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
+            <result property="version" column="version" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,order_id,order_no,
+        product_id,sku_code,product_name,
+        sale_price,quantity,item_amount,
+        create_time,update_time,is_deleted,
+        version
+    </sql>
+</mapper>
