@@ -17,6 +17,7 @@ import java.util.List;
  * 对外暴露接口时依赖抽象类型 List，可以兼容 ArrayList、Collections.emptyList()
  * 以及其他 List 实现，减少调用方和具体实现类的耦合。</p>
  *
+ * @author Administrator
  * @param <T> record data type
  */
 @Getter
@@ -32,9 +33,20 @@ public final class PageResult<T> {
 
     private final long pages;
 
+    /**
+     * validate(pageNo, pageSize, total, pages) 这段代码太优秀了，解耦！【学习】了！
+     * records == null ? Collections.emptyList() : List.copyOf(records);
+     * 太优秀了，①用来兜底 ②构造时做防御性拷贝，不直接传入引用，【学习】了！
+     *
+     * @param records
+     * @param pageNo
+     * @param pageSize
+     * @param total
+     * @param pages
+     */
     private PageResult(List<T> records, int pageNo, int pageSize, long total, long pages) {
         validate(pageNo, pageSize, total, pages);
-        this.records = records == null ? Collections.emptyList() : records;
+        this.records = records == null ? Collections.emptyList() : List.copyOf(records);
         this.pageNo = pageNo;
         this.pageSize = pageSize;
         this.total = total;
@@ -46,9 +58,9 @@ public final class PageResult<T> {
         return new PageResult<>(records, pageNo, pageSize, total, pages);
     }
 
-    public static <T> PageResult<T> of(List<T> records, int pageNo, int pageSize, long total, long pages) {
-        return new PageResult<>(records, pageNo, pageSize, total, pages);
-    }
+//    public static <T> PageResult<T> of(List<T> records, int pageNo, int pageSize, long total, long pages) {
+//        return new PageResult<>(records, pageNo, pageSize, total, pages);
+//    }
 
     public static <T> PageResult<T> empty(int pageNo, int pageSize) {
         return new PageResult<>(Collections.emptyList(), pageNo, pageSize, 0L, 0L);
@@ -69,10 +81,19 @@ public final class PageResult<T> {
         }
     }
 
+    /**
+     * 使用下面方法计算页码，如果total 接近 Long.MAX_VALUE 时，加法会溢出成负数
+     * (total + pageSize - 1) / pageSize
+     * 所以需要调整为
+     * total / pageSize + (total % pageSize == 0 ? 0 : 1)
+     * @param total
+     * @param pageSize
+     * @return
+     */
     private static long calculatePages(long total, int pageSize) {
         if (total <= 0 || pageSize <= 0) {
             return 0L;
         }
-        return (total + pageSize - 1) / pageSize;
+        return total / pageSize + (total % pageSize == 0 ? 0 : 1);
     }
 }

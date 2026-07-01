@@ -1,6 +1,9 @@
 package com.example.orderinventory.common.enums;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Stock flow business type.
@@ -10,6 +13,9 @@ public enum StockFlowBizType {
     ORDER_DEDUCT(1, "下单扣减库存"),
     ORDER_CANCEL_ROLLBACK(2, "取消订单回滚库存"),
     MANUAL_INIT(3, "人工初始化库存");
+
+    private static final Map<Integer, StockFlowBizType> CODE_MAP = Arrays.stream(values())
+            .collect(Collectors.toUnmodifiableMap(StockFlowBizType::getCode, Function.identity()));
 
     private final int code;
 
@@ -32,10 +38,7 @@ public enum StockFlowBizType {
         if (code == null) {
             return null;
         }
-        return Arrays.stream(values())
-                .filter(type -> type.code == code)
-                .findFirst()
-                .orElse(null);
+        return CODE_MAP.get(code);
     }
 
     public static boolean isValidCode(Integer code) {

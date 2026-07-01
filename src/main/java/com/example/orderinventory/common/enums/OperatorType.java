@@ -1,6 +1,9 @@
 package com.example.orderinventory.common.enums;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Operation source type.
@@ -11,6 +14,9 @@ public enum OperatorType {
     SYSTEM(0, "系统"),
     USER(1, "用户"),
     ADMIN(2, "管理员");
+
+    private static final Map<Integer, OperatorType> CODE_MAP = Arrays.stream(values())
+            .collect(Collectors.toUnmodifiableMap(OperatorType::getCode, Function.identity()));
 
     private final int code;
 
@@ -33,10 +39,7 @@ public enum OperatorType {
         if (code == null) {
             return null;
         }
-        return Arrays.stream(values())
-                .filter(type -> type.code == code)
-                .findFirst()
-                .orElse(null);
+        return CODE_MAP.get(code);
     }
 
     public static boolean isValidCode(Integer code) {
