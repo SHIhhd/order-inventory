@@ -1,6 +1,9 @@
 package com.example.orderinventory.common.enums;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Order status.
@@ -11,6 +14,9 @@ public enum OrderStatus {
     CREATED(10, "已创建"),
     CANCELLED(20, "已取消"),
     COMPLETED(30, "已完成");
+
+    private static final Map<Integer, OrderStatus> CODE_MAP = Arrays.stream(values())
+            .collect(Collectors.toUnmodifiableMap(OrderStatus::getCode, Function.identity()));
 
     private final int code;
 
@@ -37,10 +43,7 @@ public enum OrderStatus {
         if (code == null) {
             return null;
         }
-        return Arrays.stream(values())
-                .filter(status -> status.code == code)
-                .findFirst()
-                .orElse(null);
+        return CODE_MAP.get(code);
     }
 
     public static boolean isValidCode(Integer code) {

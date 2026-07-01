@@ -21,11 +21,17 @@ import java.util.Objects;
  * 这类三态语义，也常用于请求参数、数据库实体和需要泛型的场景。统一返回结构中的
  * 必填状态字段应优先使用基本类型，并通过 success()/fail() 工厂方法统一创建。</p>
  *
+ * @author Administrator
  * @param <T> response data type
  */
 @Getter
 public final class ApiResult<T> {
 
+    /**
+     * 定义一个“时间格式化器”，规定时间字符串长什么样
+     * private   - 只在 ApiResult 类内部使用。
+     * static    - 属于类本身，所有 ApiResult 对象共用同一个格式化器，不用每次 new 一个。
+     */
     private static final DateTimeFormatter TIMESTAMP_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -33,12 +39,25 @@ public final class ApiResult<T> {
 
     private final String message;
 
+    /**
+     * Object 能用，但太宽泛；T 更好。
+     */
     private final T data;
 
+    /**
+     * 这里的success属于必填项，使用基本类型，因为基本类型不能为null
+     */
     private final boolean success;
 
     private final String timestamp;
 
+    /**
+     * Objects.requireNonNull 这个API太优秀了，【学习】了！！
+     * @param code
+     * @param message
+     * @param data
+     * @param success
+     */
     private ApiResult(String code, String message, T data, boolean success) {
         this.code = Objects.requireNonNull(code, "code must not be null");
         this.message = Objects.requireNonNull(message, "message must not be null");

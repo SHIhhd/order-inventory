@@ -1063,6 +1063,41 @@ yyyy-MM-dd HH:mm:ss
 
 ---
 
+## 6.异常类
+
+### 6.1`GlobalExceptionHandler` 负责统一异常
+
+至少处理：
+
+```
+BusinessException
+MethodArgumentNotValidException
+ConstraintViolationException
+Exception
+```
+
+这一步写完后，先造一个测试接口，确认异常返回结构符合文档。
+
+### 6.2全局异常类BusinessException
+
+
+
+## 6.公共实体类、实体类、Mapper、XML
+
+### 6.1`BaseEntity` 负责审计字段
+
+统一放：
+
+```
+id
+createTime
+updateTime
+isDeleted
+version
+```
+
+实体类继承 `BaseEntity`。
+
 ## 7. 第一版接口清单
 
 | 序号 | 接口 | 方法 | 路径 |
