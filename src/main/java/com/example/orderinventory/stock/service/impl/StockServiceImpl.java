@@ -1,9 +1,6 @@
 package com.example.orderinventory.stock.service.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.orderinventory.stock.entity.ProductStock;
 import com.example.orderinventory.stock.service.StockService;
-import com.example.orderinventory.stock.mapper.ProductStockMapper;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,8 +9,7 @@ import org.springframework.stereotype.Service;
 * @createDate 2026-07-01 14:49:46
 */
 @Service
-public class StockServiceImpl extends ServiceImpl<ProductStockMapper, ProductStock>
-    implements StockService {
+public class StockServiceImpl implements StockService {
 
 }
 

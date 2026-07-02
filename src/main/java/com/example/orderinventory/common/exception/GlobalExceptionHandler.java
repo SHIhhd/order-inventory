@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -62,6 +63,12 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining("; "));
 
         return buildResponse(ErrorCode.PARAM_ERROR, defaultIfBlank(message, ErrorCode.PARAM_ERROR.getMessage()));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResult<Void>> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException exception) {
+        return buildResponse(ErrorCode.PARAM_ERROR, "请求体不能为空或 JSON 格式错误");
     }
 
     @ExceptionHandler(Exception.class)

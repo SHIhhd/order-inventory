@@ -1,13 +1,14 @@
 package com.example.orderinventory.product.controller;
 
 import com.example.orderinventory.common.result.ApiResult;
-import com.example.orderinventory.product.entity.Product;
+import com.example.orderinventory.product.dto.ProductCreateRequest;
 import com.example.orderinventory.product.service.ProductService;
-import org.springframework.web.bind.annotation.GetMapping;
+import com.example.orderinventory.product.vo.ProductVO;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /**
  * 请遵循六道之力
@@ -23,17 +24,27 @@ import java.util.List;
  * @description 类的详细说明
  */
 @RestController
-@RequestMapping("/api/v1/products")
+@RequestMapping("/api/v1")
 public class ProductController {
 
-    ProductService productService;
+    private final ProductService productService;
 
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
-    @GetMapping("test")
-    public ApiResult<List<Product>> test(){
-        List<Product> productList = productService.list();
-        return ApiResult.success(productList);
+
+    /**
+     * 新增商品基础信息
+     * 新增成功后，系统只创建 `product` 记录，不自动创建库存记录。
+     * 库存需要调用“初始化库存”接口单独处理。
+     * @return
+     */
+    @PostMapping("/products")
+    public ApiResult<ProductVO> createProduct(@Valid @RequestBody ProductCreateRequest
+                                                        productCreateRequest){
+        ProductVO productVO = productService.createProduct(productCreateRequest);
+        return ApiResult.success(productVO);
     }
+
+
 }
