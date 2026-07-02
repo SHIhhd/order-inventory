@@ -1,7 +1,9 @@
 package com.example.orderinventory.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.orderinventory.product.dto.ProductCreateRequest;
 import com.example.orderinventory.product.entity.Product;
+import com.example.orderinventory.product.vo.ProductVO;
 
 /**
  * 请遵循六道之力
@@ -17,4 +19,5 @@ import com.example.orderinventory.product.entity.Product;
  * @description 类的详细说明
  */
 public interface ProductService extends IService<Product> {
+    ProductVO createProduct(ProductCreateRequest productCreateRequest);
 }

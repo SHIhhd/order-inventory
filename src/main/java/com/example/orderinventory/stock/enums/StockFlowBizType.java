@@ -1,4 +1,4 @@
-package com.example.orderinventory.common.enums;
+package com.example.orderinventory.stock.enums;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -6,21 +6,22 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Product status.
+ * Stock flow business type.
  */
-public enum ProductStatus {
+public enum StockFlowBizType {
 
-    OFF_SHELF(0, "下架"),
-    ON_SHELF(1, "上架");
+    ORDER_DEDUCT(1, "下单扣减库存"),
+    ORDER_CANCEL_ROLLBACK(2, "取消订单回滚库存"),
+    MANUAL_INIT(3, "人工初始化库存");
 
-    private static final Map<Integer, ProductStatus> CODE_MAP = Arrays.stream(values())
-            .collect(Collectors.toUnmodifiableMap(ProductStatus::getCode, Function.identity()));
+    private static final Map<Integer, StockFlowBizType> CODE_MAP = Arrays.stream(values())
+            .collect(Collectors.toUnmodifiableMap(StockFlowBizType::getCode, Function.identity()));
 
     private final int code;
 
     private final String message;
 
-    ProductStatus(int code, String message) {
+    StockFlowBizType(int code, String message) {
         this.code = code;
         this.message = message;
     }
@@ -33,7 +34,7 @@ public enum ProductStatus {
         return message;
     }
 
-    public static ProductStatus fromCode(Integer code) {
+    public static StockFlowBizType fromCode(Integer code) {
         if (code == null) {
             return null;
         }

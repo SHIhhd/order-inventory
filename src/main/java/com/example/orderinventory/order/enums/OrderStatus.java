@@ -1,4 +1,4 @@
-package com.example.orderinventory.common.enums;
+package com.example.orderinventory.order.enums;
 
 import java.util.Arrays;
 import java.util.Map;

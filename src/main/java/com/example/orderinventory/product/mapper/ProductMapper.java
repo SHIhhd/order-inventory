@@ -2,6 +2,7 @@ package com.example.orderinventory.product.mapper;
 
 import com.example.orderinventory.product.entity.Product;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
 * @author Administrator
@@ -9,6 +10,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @createDate 2026-07-01 14:14:38
 * @Entity com.example.orderinventory.product.entity.Product
 */
+@Mapper
 public interface ProductMapper extends BaseMapper<Product> {
 
 }
