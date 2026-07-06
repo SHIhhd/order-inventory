@@ -1,10 +1,13 @@
 package com.example.orderinventory.product.controller;
 
 import com.example.orderinventory.common.result.ApiResult;
+import com.example.orderinventory.common.result.PageResult;
 import com.example.orderinventory.product.dto.ProductCreateRequest;
+import com.example.orderinventory.product.dto.ProductPageRequest;
 import com.example.orderinventory.product.service.ProductService;
 import com.example.orderinventory.product.vo.ProductVO;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,5 +49,14 @@ public class ProductController {
         return ApiResult.success(productVO);
     }
 
+    @GetMapping("/products")
+    public ApiResult<PageResult<ProductVO>> getProductPage(@Valid ProductPageRequest productPageRequest){
+        PageResult<ProductVO> pageResult = productService.getProductPage(productPageRequest.getPageNo(),
+                productPageRequest.getPageSize(),
+                productPageRequest.getKeyword(),
+                productPageRequest.getProductStatus());
+
+        return ApiResult.success(pageResult);
+    }
 
 }

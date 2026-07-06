@@ -1203,7 +1203,7 @@ GET /api/v1/products
 
 ### 8.2.2 接口说明
 
-分页查询商品列表，支持按商品名称、SKU 编码、商品状态筛选。
+ 
 
 ### 8.2.3 请求示例
 
@@ -1225,7 +1225,7 @@ GET /api/v1/products?pageNo=1&pageSize=10&keyword=苹果&productStatus=1
 ```json
 {
   "code": "SUCCESS",
-  "message": "操作成功",
+  "message": "操作成功",f
   "data": {
     "records": [
       {

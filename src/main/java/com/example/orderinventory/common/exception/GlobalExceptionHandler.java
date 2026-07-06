@@ -14,6 +14,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 
 import java.util.stream.Collectors;
 
@@ -52,6 +53,13 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining("; "));
 
         return buildResponse(ErrorCode.PARAM_ERROR, defaultIfBlank(message, ErrorCode.PARAM_ERROR.getMessage()));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResult<Void>> handleMissingServletRequestParameterException(
+            MissingServletRequestParameterException exception) {
+        String message = exception.getMessage();
+        return buildResponse(ErrorCode.PARAM_ERROR, message);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

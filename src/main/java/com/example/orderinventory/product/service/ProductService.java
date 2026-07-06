@@ -1,6 +1,7 @@
 package com.example.orderinventory.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.orderinventory.common.result.PageResult;
 import com.example.orderinventory.product.dto.ProductCreateRequest;
 import com.example.orderinventory.product.entity.Product;
 import com.example.orderinventory.product.vo.ProductVO;
@@ -20,4 +21,6 @@ import com.example.orderinventory.product.vo.ProductVO;
  */
 public interface ProductService extends IService<Product> {
     ProductVO createProduct(ProductCreateRequest productCreateRequest);
+
+    PageResult<ProductVO> getProductPage(Integer pageNo, Integer pageSize, String keyword, Integer productStatus);
 }
