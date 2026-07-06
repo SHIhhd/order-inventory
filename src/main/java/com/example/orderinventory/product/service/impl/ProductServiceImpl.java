@@ -7,9 +7,11 @@ import com.example.orderinventory.common.exception.BusinessException;
 import com.example.orderinventory.common.result.ErrorCode;
 import com.example.orderinventory.common.result.PageResult;
 import com.example.orderinventory.product.dto.ProductCreateRequest;
+import com.example.orderinventory.product.dto.ProductStatusUpdateRequest;
 import com.example.orderinventory.product.entity.Product;
 import com.example.orderinventory.product.mapper.ProductMapper;
 import com.example.orderinventory.product.service.ProductService;
+import com.example.orderinventory.product.vo.ProductStatusUpdateVO;
 import com.example.orderinventory.product.vo.ProductVO;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -101,6 +103,55 @@ public class ProductServiceImpl  extends ServiceImpl<ProductMapper, Product> imp
                 .map(ProductVO::from)
                 .collect(Collectors.toList());
         return PageResult.of(productVoList,pageNo,pageSize,productPage.getTotal());
+    }
+
+    @Override
+    @Transactional
+    public ProductStatusUpdateVO updateProductStatus(Long productId,
+                                         ProductStatusUpdateRequest productStatusUpdateRequest) {
+        if(productStatusUpdateRequest == null){
+            throw new BusinessException(ErrorCode.PARAM_ERROR,
+                    "requestBody must not be null");
+        }
+        Integer productStatus = productStatusUpdateRequest.getProductStatus();
+        if (productStatus == null
+                ||( productStatus != 0 && productStatus != 1 )) {
+            throw new BusinessException(ErrorCode.PRODUCT_STATUS_INVALID,
+                    "productStatus must be 0 or 1");
+        }
+        if (productId == null || productId <= 0) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR,
+                    "productId must be greater than 0");
+        }
+        Product product = baseMapper.selectById(productId);
+        if(product == null ){
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND,
+                    "商品不存在");
+        }
+        product.setProductStatus(productStatus);
+        int i = baseMapper.updateById(product);
+        /**
+         * 【学习】
+         * 这里使用了乐观锁，所以没有查到有两种可能 ①乐观锁版本更新 ②商品不存在/已删除
+         * 为什么还要由第二次判断latestProduct == null?
+         * 因为有可能在上面第一次 baseMapper.selectById(productId)，到 int i = baseMapper.updateById(product); 有线程并发删除了该条数据
+         */
+        if (i != 1) {
+            Product latestProduct = baseMapper.selectById(productId);
+            if(latestProduct == null){
+                throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND,"商品不存在");
+            }
+            throw new BusinessException(ErrorCode.CONCURRENT_UPDATE_FAILED, "并发更新失败");
+        }
+
+        /**
+         * 【学习】
+         * 更新前：return ProductStatusUpdateVO.from(product);
+         * ProductStatusUpdateVO.from(product) 容易让人误以为这是“数据库更新后的商品对象”。
+         * from 通常表示“从某个对象转换而来”，比如 from(Product product)。现在是两个基础字段，
+         * 更推荐： of
+         */
+        return ProductStatusUpdateVO.of(productId,productStatus);
     }
 
     private Product buildProduct(ProductCreateRequest request) {
