@@ -1,8 +1,11 @@
 package com.example.orderinventory.product.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.orderinventory.common.exception.BusinessException;
 import com.example.orderinventory.common.result.ErrorCode;
+import com.example.orderinventory.common.result.PageResult;
 import com.example.orderinventory.product.dto.ProductCreateRequest;
 import com.example.orderinventory.product.entity.Product;
 import com.example.orderinventory.product.mapper.ProductMapper;
@@ -11,6 +14,9 @@ import com.example.orderinventory.product.vo.ProductVO;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 请遵循六道之力
@@ -30,12 +36,12 @@ public class ProductServiceImpl  extends ServiceImpl<ProductMapper, Product> imp
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ProductVO createProduct(ProductCreateRequest request) {
+    public ProductVO createProduct(ProductCreateRequest productCreateRequest) {
         //如果其他类调用需要业务边界校验
-        if (request == null) {
+        if (productCreateRequest == null) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "商品创建参数不能为空");
         }
-        Product product = buildProduct(request);
+        Product product = buildProduct(productCreateRequest);
         try {
              baseMapper.insert(product);
         }catch (DuplicateKeyException e){
@@ -43,6 +49,58 @@ public class ProductServiceImpl  extends ServiceImpl<ProductMapper, Product> imp
         }
         ProductVO productVO =  ProductVO.from(product);
         return productVO;
+    }
+
+    /**
+     * ①
+     *@Transactional(readOnly = true)。
+     * 这能向 Spring 事务管理器和部分数据库驱动表达只读意图，减少误写风险。
+     *②
+     * 如果是分页查询，使用selectPage语义更明确
+     * Page<Product> productPage = baseMapper.selectPage(page, queryWrapper);
+     * productPage.getRecords()
+     * productPage.getTotal()
+     *
+     *
+     * @param pageNo
+     * @param pageSize
+     * @param keyword
+     * @param productStatus
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public PageResult<ProductVO> getProductPage(Integer pageNo, Integer pageSize,
+                                                  String keyword, Integer productStatus) {
+        if(pageNo == null || pageNo < 1){
+            throw new BusinessException(ErrorCode.PARAM_ERROR,
+                    "pageNo must be greater than or equal to 1");
+        }
+        if(pageSize == null || pageSize < 1 || pageSize > 100){
+            throw new BusinessException(ErrorCode.PARAM_ERROR,
+                    "pageSize must be greater than or equal to 1 and" +
+                    "less than or equal to 100");
+        }
+        if (productStatus != null && productStatus != 0 && productStatus != 1) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR,
+                    "productStatus must be 0 or 1");
+        }
+
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
+        LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
+        //TODO like 默认通常是 %keyword%。索引会失效，后续重新优化
+        queryWrapper.and(hasKeyword,keywordWrapper -> keywordWrapper
+                        .like(Product::getProductName , keyword)
+                        .or()
+                        .like(Product::getSkuCode , keyword))
+                .eq(productStatus!=null , Product::getProductStatus , productStatus)
+                .orderByDesc(Product::getCreateTime);
+        Page<Product> productPage = new Page<>(pageNo, pageSize);
+        productPage = baseMapper.selectPage(productPage, queryWrapper);
+        List<ProductVO> productVoList = productPage.getRecords().stream()
+                .map(ProductVO::from)
+                .collect(Collectors.toList());
+        return PageResult.of(productVoList,pageNo,pageSize,productPage.getTotal());
     }
 
     private Product buildProduct(ProductCreateRequest request) {
