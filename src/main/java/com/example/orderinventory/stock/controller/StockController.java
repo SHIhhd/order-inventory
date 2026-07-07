@@ -1,5 +1,12 @@
 package com.example.orderinventory.stock.controller;
 
+import com.example.orderinventory.common.result.ApiResult;
+import com.example.orderinventory.stock.dto.StockInitRequest;
+import com.example.orderinventory.stock.vo.ProductStockVO;
+import com.example.orderinventory.stock.service.StockService;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,6 +24,19 @@ import org.springframework.web.bind.annotation.RestController;
  * @description 类的详细说明
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/stocks")
 public class StockController {
+
+    private final StockService stockService;
+
+    public StockController(StockService stockService) {
+        this.stockService = stockService;
+    }
+
+
+    @PostMapping("/init")
+    public ApiResult<ProductStockVO> initStock(@Valid @RequestBody StockInitRequest stockInitRequest){
+        ProductStockVO productStockVO = stockService.initStock(stockInitRequest);
+        return ApiResult.success(productStockVO);
+    }
 }

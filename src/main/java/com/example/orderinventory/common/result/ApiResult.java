@@ -52,7 +52,9 @@ public final class ApiResult<T> {
     private final String timestamp;
 
     /**
-     * Objects.requireNonNull 这个API太优秀了，【学习】了！！
+     * Objects.requireNonNull 这个API 的缺点：
+     * ①只能判断是否为NULL
+     * ②抛出的异常是NullPointerException，不一定能被全局异常捕获
      * @param code
      * @param message
      * @param data

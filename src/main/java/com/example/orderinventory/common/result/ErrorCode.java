@@ -18,6 +18,7 @@ public enum ErrorCode {
     PRODUCT_SKU_DUPLICATE(HttpStatus.CONFLICT, "商品 SKU 编码重复"),
     STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "库存记录不存在"),
     STOCK_ALREADY_EXISTS(HttpStatus.CONFLICT, "库存记录已存在"),
+    STOCK_FLOW_ALREADY_EXISTS(HttpStatus.CONFLICT, "库存流水已存在"),
     STOCK_NOT_ENOUGH(HttpStatus.CONFLICT, "库存不足"),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "订单不存在"),
     ORDER_STATUS_INVALID(HttpStatus.CONFLICT, "订单状态非法"),
