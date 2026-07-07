@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Validated
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/products")
 public class ProductController {
 
     private final ProductService productService;
@@ -49,14 +49,14 @@ public class ProductController {
      * 库存需要调用“初始化库存”接口单独处理。
      * @return
      */
-    @PostMapping("/products")
+    @PostMapping
     public ApiResult<ProductVO> createProduct(@Valid @RequestBody ProductCreateRequest
                                                         productCreateRequest){
         ProductVO productVO = productService.createProduct(productCreateRequest);
         return ApiResult.success(productVO);
     }
 
-    @GetMapping("/products")
+    @GetMapping
     public ApiResult<PageResult<ProductVO>> getProductPage(@Valid ProductPageRequest productPageRequest){
         PageResult<ProductVO> pageResult = productService.getProductPage(productPageRequest.getPageNo(),
                 productPageRequest.getPageSize(),
@@ -104,15 +104,15 @@ public class ProductController {
      * JSON body：要创建/修改的数据，比如 productStatus、quantity、remark
      * Query 参数：查询筛选条件，比如 pageNo、pageSize、keyword、status
      * 简单判断规则：
-     * 这个值是用来找到谁？ 放路径：/products/{productId}
+     * 这个值是用来找到1谁？ 放路径：/products/{productId}
      * 这个值是要改成什么？ 放 JSON：{"productStatus": 0}
-     * 这个值是查询/过滤/分页？ 放 query：?pageNo=1&pageSize=10&status=1
+     * 这个值是查询/过滤/分页？ 放 query：?pageNo=1&pageSize=10&status=
      *
      * @param productId
      * @param productStatusUpdateRequest
      * @return
      */
-    @PatchMapping("/products/{productId}/status")
+    @PatchMapping("/{productId}/status")
     public ApiResult<ProductStatusUpdateVO> updateProductStatus(@Positive(message = "productId must be greater than 0") @PathVariable Long productId,
                                                     @Valid @RequestBody ProductStatusUpdateRequest productStatusUpdateRequest){
         ProductStatusUpdateVO productStatusUpdateVO =  productService.updateProductStatus(productId,productStatusUpdateRequest);

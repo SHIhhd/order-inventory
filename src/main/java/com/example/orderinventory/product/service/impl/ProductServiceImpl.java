@@ -9,6 +9,7 @@ import com.example.orderinventory.common.result.PageResult;
 import com.example.orderinventory.product.dto.ProductCreateRequest;
 import com.example.orderinventory.product.dto.ProductStatusUpdateRequest;
 import com.example.orderinventory.product.entity.Product;
+import com.example.orderinventory.product.enums.ProductStatus;
 import com.example.orderinventory.product.mapper.ProductMapper;
 import com.example.orderinventory.product.service.ProductService;
 import com.example.orderinventory.product.vo.ProductStatusUpdateVO;
@@ -16,6 +17,7 @@ import com.example.orderinventory.product.vo.ProductVO;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,21 +76,14 @@ public class ProductServiceImpl  extends ServiceImpl<ProductMapper, Product> imp
     @Transactional(readOnly = true)
     public PageResult<ProductVO> getProductPage(Integer pageNo, Integer pageSize,
                                                   String keyword, Integer productStatus) {
-        if(pageNo == null || pageNo < 1){
-            throw new BusinessException(ErrorCode.PARAM_ERROR,
-                    "pageNo must be greater than or equal to 1");
-        }
-        if(pageSize == null || pageSize < 1 || pageSize > 100){
-            throw new BusinessException(ErrorCode.PARAM_ERROR,
-                    "pageSize must be greater than or equal to 1 and" +
-                    "less than or equal to 100");
-        }
-        if (productStatus != null && productStatus != 0 && productStatus != 1) {
-            throw new BusinessException(ErrorCode.PARAM_ERROR,
+
+        if (productStatus == null
+                || !ProductStatus.isValidCode(productStatus)){
+            throw new BusinessException(ErrorCode.PRODUCT_STATUS_INVALID,
                     "productStatus must be 0 or 1");
         }
 
-        boolean hasKeyword = keyword != null && !keyword.isBlank();
+        boolean hasKeyword = StringUtils.hasText(keyword);
         LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
         //TODO like 默认通常是 %keyword%。索引会失效，后续重新优化
         queryWrapper.and(hasKeyword,keywordWrapper -> keywordWrapper
@@ -109,19 +104,12 @@ public class ProductServiceImpl  extends ServiceImpl<ProductMapper, Product> imp
     @Transactional
     public ProductStatusUpdateVO updateProductStatus(Long productId,
                                          ProductStatusUpdateRequest productStatusUpdateRequest) {
-        if(productStatusUpdateRequest == null){
-            throw new BusinessException(ErrorCode.PARAM_ERROR,
-                    "requestBody must not be null");
-        }
+
         Integer productStatus = productStatusUpdateRequest.getProductStatus();
         if (productStatus == null
-                ||( productStatus != 0 && productStatus != 1 )) {
+                || !ProductStatus.isValidCode(productStatus)) {
             throw new BusinessException(ErrorCode.PRODUCT_STATUS_INVALID,
                     "productStatus must be 0 or 1");
-        }
-        if (productId == null || productId <= 0) {
-            throw new BusinessException(ErrorCode.PARAM_ERROR,
-                    "productId must be greater than 0");
         }
         Product product = baseMapper.selectById(productId);
         if(product == null ){
@@ -143,7 +131,6 @@ public class ProductServiceImpl  extends ServiceImpl<ProductMapper, Product> imp
             }
             throw new BusinessException(ErrorCode.CONCURRENT_UPDATE_FAILED, "并发更新失败");
         }
-
         /**
          * 【学习】
          * 更新前：return ProductStatusUpdateVO.from(product);

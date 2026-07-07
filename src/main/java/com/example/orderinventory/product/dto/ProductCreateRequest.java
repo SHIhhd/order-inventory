@@ -38,12 +38,7 @@ public class ProductCreateRequest {
     @Size( max = 128 ,message = "商品名称长度大于1小于128")
     private String productName;
 
-    /**
-     * 商品状态：0-下架，1-上架
-     * 【学习】
-     * 这里的productStatus是必填，如果是int基本类型，不存在判断非空，因为一定有默认值
-     * 所以 DTO 里建议用包装类型，尤其是需要表达“未传入 / 未设置”的字段。
-     */
+
     @NotNull
     @Min(value = 0 , message = "商品状态只能是0或1")
     @Max(value = 1 , message = "商品状态只能是0或1")

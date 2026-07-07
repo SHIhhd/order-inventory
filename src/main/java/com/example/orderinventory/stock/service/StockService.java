@@ -1,5 +1,8 @@
 package com.example.orderinventory.stock.service;
 
+import com.example.orderinventory.stock.dto.StockInitRequest;
+import com.example.orderinventory.stock.vo.ProductStockVO;
+
 /**
 * @author Administrator
 * @description 针对表【product_stock(商品库存表：保存商品当前库存信息)】的数据库操作Service
@@ -7,4 +10,5 @@ package com.example.orderinventory.stock.service;
 */
 public interface StockService {
 
+    ProductStockVO initStock(StockInitRequest stockInitRequest);
 }
