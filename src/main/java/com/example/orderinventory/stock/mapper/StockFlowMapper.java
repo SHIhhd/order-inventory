@@ -3,6 +3,9 @@ package com.example.orderinventory.stock.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.orderinventory.stock.entity.StockFlow;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
 * @author Administrator
@@ -12,6 +15,11 @@ import org.apache.ibatis.annotations.Mapper;
 */
 @Mapper
 public interface StockFlowMapper extends BaseMapper<StockFlow> {
+
+
+    int batchInsert(@Param("stockFlowBatch")List<StockFlow> stockFlowBatch);
+
+
 
 }
 

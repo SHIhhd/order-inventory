@@ -5,15 +5,13 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.orderinventory.common.domain.BaseEntity;
 import lombok.Data;
 
-import java.io.Serializable;
-
 /**
  * 订单主表：保存订单整体信息
  * @TableName order_info
  */
 @TableName(value ="order_info")
 @Data
-public class OrderInfo extends BaseEntity implements Serializable {
+public class OrderInfo extends BaseEntity{
     /**
      * 订单编号，业务唯一标识
      */
