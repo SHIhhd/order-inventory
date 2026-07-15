@@ -4,8 +4,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.orderinventory.common.domain.BaseEntity;
 import lombok.Data;
-
-import java.io.Serializable;
+import lombok.EqualsAndHashCode;
 
 /**
  * 订单明细表：保存订单中的商品快照信息
@@ -13,7 +12,8 @@ import java.io.Serializable;
  */
 @TableName(value ="order_item")
 @Data
-public class OrderItem extends BaseEntity implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class OrderItem extends BaseEntity{
     /**
      * 订单ID，对应order_info.id
      */

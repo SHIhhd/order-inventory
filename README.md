@@ -1401,7 +1401,7 @@ POST /api/v1/stocks/init
 8. stock_flow.beforeQuantity = 0。
 9. stock_flow.afterQuantity = availableQuantity。
 10.第一版stock_flow.bizNo = "STOCK_INIT_" + productId
-11.第一版stock_flow.operatorType=0
+11.第一版stock_flow.operatorType=0   
 12.stock_flow.remark=remark
 ```
 

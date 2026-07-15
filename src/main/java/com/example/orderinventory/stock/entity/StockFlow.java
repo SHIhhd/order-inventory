@@ -1,11 +1,8 @@
 package com.example.orderinventory.stock.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.orderinventory.common.domain.BaseEntity;
-import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -14,7 +11,8 @@ import lombok.Data;
  */
 @TableName(value ="stock_flow")
 @Data
-public class StockFlow extends BaseEntity implements Serializable {
+
+public class StockFlow extends BaseEntity {
     /**
      * 商品ID，对应product.id
      */

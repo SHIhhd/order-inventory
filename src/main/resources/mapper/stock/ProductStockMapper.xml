@@ -18,10 +18,15 @@
             <result property="version" column="version" jdbcType="INTEGER"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        id,product_id,available_quantity,
-        locked_quantity,total_in_quantity,total_out_quantity,
-        remark,create_time,update_time,
-        is_deleted,version
-    </sql>
+
+    <update id="deductStock">
+        update product_stock
+        set available_quantity
+                               = available_quantity - #{quantity},
+            total_out_quantity =total_out_quantity + #{quantity},
+            version            = version + 1
+        where product_id = #{productId}
+          and available_quantity >= #{quantity}
+          and is_deleted = 0
+    </update>
 </mapper>

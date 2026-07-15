@@ -5,15 +5,13 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.orderinventory.common.domain.BaseEntity;
 import lombok.Data;
 
-import java.io.Serializable;
-
 /**
  * 商品库存表：保存商品当前库存信息
  * @TableName product_stock
  */
 @TableName(value ="product_stock")
 @Data
-public class ProductStock extends BaseEntity implements Serializable {
+public class ProductStock extends BaseEntity {
     /**
      * 商品ID，对应product.id
      */

@@ -1,7 +1,10 @@
 package com.example.orderinventory.order.mapper;
-
-import com.example.orderinventory.order.entity.OrderItem;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.orderinventory.order.entity.OrderItem;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
 * @author Administrator
@@ -9,8 +12,14 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @createDate 2026-07-01 14:59:51
 * @Entity com.example.orderinventory.order.entity.OrderItem
 */
+@Mapper
 public interface OrderItemMapper extends BaseMapper<OrderItem> {
 
+
+    int batchInsert(@Param("orderItemBatch")List<OrderItem> orderItemBatch);
+
+
+    //int batchInsert(@Param("orderItemBatch") List<OrderItem> orderItemBatch);
 }
 
 

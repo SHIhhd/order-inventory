@@ -1,11 +1,8 @@
 package com.example.orderinventory.product.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.orderinventory.common.domain.BaseEntity;
-import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -14,7 +11,7 @@ import lombok.Data;
  */
 @TableName(value ="product")
 @Data
-public class Product extends BaseEntity implements Serializable {
+public class Product extends BaseEntity {
     /**
      * 商品SKU编码，业务唯一标识
      */

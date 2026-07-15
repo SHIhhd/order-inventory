@@ -1,8 +1,9 @@
 package com.example.orderinventory.stock.mapper;
 
-import com.example.orderinventory.stock.entity.ProductStock;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.orderinventory.stock.entity.ProductStock;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
 * @author Administrator
@@ -12,7 +13,16 @@ import org.apache.ibatis.annotations.Mapper;
 */
 @Mapper
 public interface ProductStockMapper extends BaseMapper<ProductStock> {
-
+    /**
+     * 【】
+     * 不应依赖订单层的 ItemsDTO
+     * int updateQuantity(OrderCreateRequest.ItemsDTO itemsDTO);
+     * 建议改成 deductStock(Long productId, Integer quantity)，降低模块耦合
+     * @param
+     * @return
+     */
+    int deductStock(@Param("productId") Long productId,
+                    @Param("quantity") Integer quantity);
 }
 
 
