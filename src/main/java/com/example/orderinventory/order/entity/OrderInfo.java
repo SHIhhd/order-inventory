@@ -23,6 +23,11 @@ public class OrderInfo extends BaseEntity{
     private Long buyerId;
 
     /**
+     * 客户端请求唯一标识，用于下单幂等
+     */
+    private Long requestId;
+
+    /**
      * 订单状态：10-已创建，20-已取消，30-已完成
      */
     private Integer orderStatus;

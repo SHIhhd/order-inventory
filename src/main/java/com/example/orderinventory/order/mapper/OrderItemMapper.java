@@ -12,7 +12,6 @@ import java.util.List;
 * @createDate 2026-07-01 14:59:51
 * @Entity com.example.orderinventory.order.entity.OrderItem
 */
-@Mapper
 public interface OrderItemMapper extends BaseMapper<OrderItem> {
 
 

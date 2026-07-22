@@ -3,7 +3,6 @@ package com.example.orderinventory.common.result;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 /**
@@ -27,14 +26,6 @@ import java.util.Objects;
 @Getter
 public final class ApiResult<T> {
 
-    /**
-     * 定义一个“时间格式化器”，规定时间字符串长什么样
-     * private   - 只在 ApiResult 类内部使用。
-     * static    - 属于类本身，所有 ApiResult 对象共用同一个格式化器，不用每次 new 一个。
-     */
-    private static final DateTimeFormatter TIMESTAMP_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
     private final String code;
 
     private final String message;
@@ -49,7 +40,7 @@ public final class ApiResult<T> {
      */
     private final boolean success;
 
-    private final String timestamp;
+    private final LocalDateTime timestamp;
 
     /**
      * Objects.requireNonNull 这个API 的缺点：
@@ -65,7 +56,7 @@ public final class ApiResult<T> {
         this.message = Objects.requireNonNull(message, "message must not be null");
         this.data = data;
         this.success = success;
-        this.timestamp = LocalDateTime.now().format(TIMESTAMP_FORMATTER);
+        this.timestamp = LocalDateTime.now();
     }
 
     public static <T> ApiResult<T> success() {

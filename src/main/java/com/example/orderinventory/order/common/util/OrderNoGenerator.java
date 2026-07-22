@@ -32,7 +32,7 @@ public final class OrderNoGenerator {
     /**
      * TODO 后续的订单号再做优化
      */
-    public static String generate() {
+    public static String generateOrderNo() {
         /**
          * 【学习】
          * 雪花算法

@@ -54,6 +54,7 @@ CREATE TABLE order_info (
                             id BIGINT NOT NULL COMMENT '主键ID，MyBatis-Plus雪花算法生成',
                             order_no VARCHAR(64) NOT NULL COMMENT '订单编号，业务唯一标识',
                             buyer_id BIGINT NOT NULL COMMENT '下单用户ID，第一版不建立用户表，仅保留扩展字段',
+                            request_id VARCHAR(64) NOT NULL COMMENT '客户端请求唯一标识，用于下单幂等',
                             order_status TINYINT NOT NULL DEFAULT 10 COMMENT '订单状态：10-已创建，20-已取消，30-已完成',
                             total_amount BIGINT NOT NULL DEFAULT 0 COMMENT '订单总金额，单位：分',
                             total_quantity INT NOT NULL DEFAULT 0 COMMENT '订单商品总数量',
@@ -65,6 +66,7 @@ CREATE TABLE order_info (
                             version INT NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
                             PRIMARY KEY (id),
                             UNIQUE KEY uk_order_info_order_no (order_no),
+                            UNIQUE KEY uk_order_buyer_request (buyer_id, request_id),
                             KEY idx_order_info_buyer_id (buyer_id),
                             KEY idx_order_info_status_create_time (order_status, create_time)
 ) ENGINE=InnoDB

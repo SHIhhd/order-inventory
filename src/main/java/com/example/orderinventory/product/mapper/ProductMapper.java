@@ -10,7 +10,6 @@ import org.apache.ibatis.annotations.Mapper;
 * @createDate 2026-07-01 14:14:38
 * @Entity com.example.orderinventory.product.entity.Product
 */
-@Mapper
 public interface ProductMapper extends BaseMapper<Product> {
 
 }

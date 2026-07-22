@@ -3,7 +3,7 @@ package com.example.orderinventory.order.controller;
 import com.example.orderinventory.common.result.ApiResult;
 import com.example.orderinventory.order.dto.OrderCreateRequest;
 import com.example.orderinventory.order.service.OrderService;
-import com.example.orderinventory.order.vo.OrderCreateVO;
+import com.example.orderinventory.order.vo.OrderCreateResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,9 +34,10 @@ public class OrderController {
     }
 
     @PostMapping
-    public ApiResult<OrderCreateVO> createOrder(
+    public ApiResult<OrderCreateResponse> createOrder(
             @Valid  @RequestBody OrderCreateRequest orderCreateRequest){
-        OrderCreateVO  orderCreateVO= orderService.createOrder(orderCreateRequest);
-        return ApiResult.success(orderCreateVO);
+        OrderCreateResponse response = orderService.createOrder(orderCreateRequest);
+        return ApiResult.success(response);
     }
 }
+

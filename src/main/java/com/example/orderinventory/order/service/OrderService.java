@@ -1,7 +1,7 @@
 package com.example.orderinventory.order.service;
 
 import com.example.orderinventory.order.dto.OrderCreateRequest;
-import com.example.orderinventory.order.vo.OrderCreateVO;
+import com.example.orderinventory.order.vo.OrderCreateResponse;
 
 /**
 * @author Administrator
@@ -10,5 +10,5 @@ import com.example.orderinventory.order.vo.OrderCreateVO;
 */
 public interface OrderService  {
 
-    OrderCreateVO createOrder(OrderCreateRequest orderCreateRequest);
+    OrderCreateResponse createOrder(OrderCreateRequest orderCreateRequest);
 }
