@@ -13,9 +13,11 @@ package com.example.orderinventory.order.common.constant;
  * @date 2026/7/11 20:30
  * @description 类的详细说明
  */
-public final class OrderLimits {
-    public static final int MAX_ITEM_TYPES = 100;
+public final class orderCreationLimits {
+    public static final int MAX_ITEM_TYPES_COUNT = 100;
+
     public static final long MAX_ITEM_QUANTITY = 10_000L;
+
     public static final long MAX_ORDER_AMOUNT = 10_000_000_000L;
 
     /**
@@ -31,6 +33,6 @@ public final class OrderLimits {
      * 这种类需要被Spring实例化，因此不能使用私有构造器。
      */
 
-    private OrderLimits() {
+    private orderCreationLimits() {
     }
 }

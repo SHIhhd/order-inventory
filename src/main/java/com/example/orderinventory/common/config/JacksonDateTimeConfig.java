@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter;
  * @description 类的详细说明
  */
 @Configuration
-public class JacksonConfig {
+public class JacksonDateTimeConfig {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

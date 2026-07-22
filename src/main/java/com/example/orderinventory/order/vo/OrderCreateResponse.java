@@ -3,7 +3,6 @@ package com.example.orderinventory.order.vo;
 import com.example.orderinventory.order.entity.OrderInfo;
 import com.example.orderinventory.order.enums.OrderStatus;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -22,10 +21,9 @@ import java.time.LocalDateTime;
  */
 
 @Getter
-@Setter
-public class OrderCreateVO {
+public class OrderCreateResponse {
 
-    private OrderCreateVO(OrderInfo orderInfo) {
+    private OrderCreateResponse(OrderInfo orderInfo) {
         this.orderNo=orderInfo.getOrderNo();
         this.buyerId = orderInfo.getBuyerId();
         this.orderStatus = orderInfo.getOrderStatus();
@@ -45,7 +43,7 @@ public class OrderCreateVO {
     private Integer totalQuantity;
     private LocalDateTime createTime;
 
-    public static OrderCreateVO from(OrderInfo orderInfo){
-        return new OrderCreateVO(orderInfo);
+    public static OrderCreateResponse from(OrderInfo orderInfo){
+        return new OrderCreateResponse(orderInfo);
     }
 }

@@ -1,13 +1,21 @@
-package com.example.orderinventory.order.dto;/**
- *       请遵循六道之力
- *【①】这个字段会不会是 null？
- *【②】这个类需不需要 setter？
- *【③】有没有统一创建方法？
- *【④】有没有泛型？
- *【⑤】有没有依赖具体实现类？
- *【⑥】传错参数会不会悄悄生成错误结果？
- * @author 我他妈莱纳 
- * @date 2026/7/15 20:17
- * @description 类的详细说明
- */public class OrderCreateItemRequest {
+package com.example.orderinventory.order.dto;
+
+import com.example.orderinventory.order.common.constant.orderCreationLimits;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+
+public record OrderCreateItemRequest (
+    @NotNull
+    @Positive(message = "商品ID不合法")
+     Long productId,
+
+    @NotNull(message = "商品数量不能为空")
+    @Positive(message = "购买数量必须大于0")
+    @Max(
+            value = orderCreationLimits.MAX_ITEM_QUANTITY ,
+            message = "单个商品购买数量不能超过{value}"
+    )
+     Integer quantity){
 }
