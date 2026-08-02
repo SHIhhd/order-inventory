@@ -1225,7 +1225,7 @@ GET /api/v1/products?pageNo=1&pageSize=10&keyword=苹果&productStatus=1
 ```json
 {
   "code": "SUCCESS",
-  "message": "操作成功",f
+  "message": "操作成功",
   "data": {
     "records": [
       {

@@ -1,10 +1,18 @@
 package com.example.orderinventory.order.controller;
 
 import com.example.orderinventory.common.result.ApiResult;
+import com.example.orderinventory.order.dto.OrderCancelRequest;
 import com.example.orderinventory.order.dto.OrderCreateRequest;
 import com.example.orderinventory.order.service.OrderService;
+import com.example.orderinventory.order.vo.OrderCancelResponse;
 import com.example.orderinventory.order.vo.OrderCreateResponse;
+import com.example.orderinventory.order.vo.OrderDetailResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2026/7/7 21:28
  * @description 类的详细说明
  */
+@Validated
 @RestController
 @RequestMapping("/api/v1/orders")
 public class OrderController {
@@ -39,5 +48,22 @@ public class OrderController {
         OrderCreateResponse response = orderService.createOrder(orderCreateRequest);
         return ApiResult.success(response);
     }
+
+    @PostMapping("/{orderNo}/cancel")
+    public ApiResult<OrderCancelResponse> cancelOrder(@PathVariable("orderNo") String orderNo,
+                                                      @Valid @RequestBody OrderCancelRequest orderCancelRequest){
+
+        OrderCancelResponse response = orderService.cancelOrder(orderNo,orderCancelRequest);
+        return ApiResult.success(response);
+    }
+
+    @GetMapping("/{orderNo}")
+    public ApiResult<OrderDetailResponse> getOrderDetail(
+            @PathVariable
+            @NotBlank(message = "订单编号不能为空")
+            @Size(max = 64, message = "订单编号长度不能超过64") String orderNo)  {
+        return ApiResult.success(orderService.getOrderDetail(orderNo));
+    }
+
 }
 

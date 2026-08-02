@@ -2,6 +2,7 @@ package com.example.orderinventory.order.enums;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,14 +40,16 @@ public enum OrderStatus {
         return this == CREATED;
     }
 
+    /**
+     * 尝试转换，未知状态返回 null。
+     */
     public static OrderStatus fromCode(Integer code) {
-        if (code == null) {
-            return null;
-        }
-        return CODE_MAP.get(code);
+        return code == null ? null : CODE_MAP.get(code);
     }
 
-    public static boolean isValidCode(Integer code) {
-        return fromCode(code) != null;
+    public static Optional<OrderStatus> findByCode(Integer code) {
+        return Optional.ofNullable(code)
+                .map(CODE_MAP::get);
     }
+
 }

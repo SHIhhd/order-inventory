@@ -1,7 +1,10 @@
 package com.example.orderinventory.order.service;
 
+import com.example.orderinventory.order.dto.OrderCancelRequest;
 import com.example.orderinventory.order.dto.OrderCreateRequest;
+import com.example.orderinventory.order.vo.OrderCancelResponse;
 import com.example.orderinventory.order.vo.OrderCreateResponse;
+import com.example.orderinventory.order.vo.OrderDetailResponse;
 
 /**
 * @author Administrator
@@ -11,4 +14,8 @@ import com.example.orderinventory.order.vo.OrderCreateResponse;
 public interface OrderService  {
 
     OrderCreateResponse createOrder(OrderCreateRequest orderCreateRequest);
+
+    OrderCancelResponse cancelOrder(String orderNo, OrderCancelRequest orderCancelRequest);
+
+    OrderDetailResponse getOrderDetail(String orderNo);
 }

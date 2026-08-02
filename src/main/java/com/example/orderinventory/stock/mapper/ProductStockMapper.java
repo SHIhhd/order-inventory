@@ -1,8 +1,10 @@
 package com.example.orderinventory.stock.mapper;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.orderinventory.stock.entity.ProductStock;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -23,7 +25,12 @@ public interface ProductStockMapper extends BaseMapper<ProductStock> {
     int deductStock(@Param("productId") Long productId,
                     @Param("quantity") Integer quantity);
 
-    List<Integer> lockStocks(@Param("productIds")List<Long> productIds);
+    List<ProductStock> selectByProductIdsForUpdate(@Param("productIds")List<Long> productIds);
+
+    int batchRollbackStocks(@Param("productStocks") List<ProductStock> productStocks,
+                            @Param("now") LocalDateTime now);
+
+
 
 
 
