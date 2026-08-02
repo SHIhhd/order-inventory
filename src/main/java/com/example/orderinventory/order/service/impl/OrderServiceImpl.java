@@ -2,11 +2,13 @@ package com.example.orderinventory.order.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.example.orderinventory.common.enums.OperatorType;
 import com.example.orderinventory.common.exception.BusinessException;
 import com.example.orderinventory.common.result.ErrorCode;
 import com.example.orderinventory.order.common.constant.orderCreationLimits;
 import com.example.orderinventory.order.common.util.OrderNoGenerator;
+import com.example.orderinventory.order.dto.OrderCancelRequest;
 import com.example.orderinventory.order.dto.OrderCreateItemRequest;
 import com.example.orderinventory.order.dto.OrderCreateRequest;
 import com.example.orderinventory.order.entity.OrderInfo;
@@ -14,8 +16,11 @@ import com.example.orderinventory.order.entity.OrderItem;
 import com.example.orderinventory.order.enums.OrderStatus;
 import com.example.orderinventory.order.mapper.OrderInfoMapper;
 import com.example.orderinventory.order.mapper.OrderItemMapper;
+import com.example.orderinventory.order.mapper.model.OrderDetailQueryResult;
 import com.example.orderinventory.order.service.OrderService;
+import com.example.orderinventory.order.vo.OrderCancelResponse;
 import com.example.orderinventory.order.vo.OrderCreateResponse;
+import com.example.orderinventory.order.vo.OrderDetailResponse;
 import com.example.orderinventory.product.entity.Product;
 import com.example.orderinventory.product.enums.ProductStatus;
 import com.example.orderinventory.product.mapper.ProductMapper;
@@ -26,13 +31,16 @@ import com.example.orderinventory.stock.mapper.ProductStockMapper;
 import com.example.orderinventory.stock.mapper.StockFlowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -73,6 +81,13 @@ public class OrderServiceImpl implements OrderService {
     ) {
     }
 
+    private record OrderCancelContext(
+            OrderCancelRequest orderCancelRequest,
+            String orderNo,
+            LocalDateTime now
+
+    ){}
+
     private record CalculatedOrder(
             long totalAmount,
             int totalQuantity,
@@ -87,6 +102,9 @@ public class OrderServiceImpl implements OrderService {
             long itemAmount
     ){
     }
+
+
+
     /**
      * TODO 后续将这个方法拆成不同的bean
      * @param orderCreateRequest
@@ -124,15 +142,346 @@ public class OrderServiceImpl implements OrderService {
         return OrderCreateResponse.from(orderInfo);
     }
 
-    //TODO 保留
-    private void lockStock(OrderCreationContext context , CalculatedOrder calculateOrder,List<Long> productIds ) {
-        //锁库存
-        productStockMapper.lockStocks(productIds);
-        //校验库存快速失败
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public OrderCancelResponse cancelOrder(String orderNo,
+                                           OrderCancelRequest orderCancelRequest) {
+        /**
+         * 根据订单查询商品信息
+         * 修改订单状态为 20
+         * 商品信息按id排序
+         * select   from update 锁库存
+         * 库存回滚
+         * 插入流水
+         */
 
-
-
+        LocalDateTime now = LocalDateTime.now();
+        OrderCancelContext orderCancelContext =
+                new OrderCancelContext(orderCancelRequest,orderNo,now);
+        OrderInfo canceledOrder = markOrderCancelled(orderCancelContext);
+        Map<Long, OrderItem> orderItemByProductId=
+                loadAndValidateOrderItems(canceledOrder);
+        List<ProductStock> rollBackProductStocks =
+                loadAndLockProductStock(orderItemByProductId);
+        rollbackStocks(rollBackProductStocks,now);
+        createAndPersistStockFlows(
+                canceledOrder.getBuyerId(),
+                rollBackProductStocks,
+                orderItemByProductId,
+                orderCancelContext);
+        return new OrderCancelResponse(orderNo,
+                OrderStatus.CANCELLED.getCode(),
+                OrderStatus.CANCELLED.getMessage(),
+                orderCancelRequest.cancelReason(),
+                now);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderDetailResponse getOrderDetail(String orderNo)  {
+        OrderDetailQueryResult orderDetail
+                = orderInfoMapper.selectOrderDetailByOrderNo(orderNo);
+        if(Objects.isNull(orderDetail)){
+            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+        }
+        Integer statusCode = orderDetail.getOrderStatus();
+        OrderStatus orderStatus = OrderStatus.findByCode(statusCode)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.SYSTEM_ERROR,
+                        "订单状态数据非法，orderStatus=" + statusCode
+                ));
+        return OrderDetailResponse.from(orderDetail,orderStatus);
+    }
+
+    private void validateLockedStocks(
+            Map<Long, OrderItem> orderItemByProductId,
+            List<ProductStock> lockedStocks) {
+
+        Set<Long> expectedIds = orderItemByProductId.keySet();
+
+        Set<Long> actualIds = lockedStocks.stream()
+                .map(ProductStock::getProductId)
+                .collect(Collectors.toSet());
+
+        if (actualIds.size() != lockedStocks.size()) {
+            throw new BusinessException(
+                    ErrorCode.SYSTEM_ERROR,
+                    "库存查询结果存在重复商品"
+            );
+        }
+
+        Set<Long> missingIds = new HashSet<>(expectedIds);
+        missingIds.removeAll(actualIds);
+
+        if (!missingIds.isEmpty()) {
+            throw new BusinessException(
+                    ErrorCode.STOCK_NOT_FOUND,
+                    "库存记录不存在，productIds=" + missingIds
+            );
+        }
+
+        Set<Long> unexpectedIds = new HashSet<>(actualIds);
+        unexpectedIds.removeAll(expectedIds);
+
+        if (!unexpectedIds.isEmpty()) {
+            throw new BusinessException(
+                    ErrorCode.SYSTEM_ERROR,
+                    "库存查询包含非订单商品，productIds=" + unexpectedIds
+            );
+        }
+    }
+
+    private void rollbackStocks(List<ProductStock> productStocks, LocalDateTime now) {
+        int batchRollbackStocks = productStockMapper
+                .batchRollbackStocks(productStocks,now);
+        assertAffectedRows(productStocks,batchRollbackStocks);
+    }
+
+
+    private Map<Long, OrderItem>  loadAndValidateOrderItems(OrderInfo orderInfo) {
+        List<OrderItem> orderItems = orderItemMapper.selectList(
+                Wrappers.<OrderItem>lambdaQuery()
+                        .eq(OrderItem::getOrderNo, orderInfo.getOrderNo())
+                        .orderByAsc(OrderItem::getProductId)
+        );
+
+        if (orderItems.isEmpty()) {
+            throw new BusinessException(ErrorCode.ORDER_ITEM_EMPTY);
+        }
+
+        validateOrderItemFields(orderInfo, orderItems);
+        validateOrderItemSummary(orderInfo, orderItems);
+
+        return orderItems.stream().collect(
+                Collectors.toMap(OrderItem::getProductId, Function.identity())
+        );
+    }
+
+
+    private void validateOrderItemFields(
+            OrderInfo orderInfo,
+            List<OrderItem> orderItems) {
+
+        Set<Long> productIds = new HashSet<>(orderItems.size());
+
+        for (OrderItem item : orderItems) {
+            if (!Objects.equals(item.getOrderId(), orderInfo.getId())
+                    || !Objects.equals(item.getOrderNo(), orderInfo.getOrderNo())) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,
+                        "订单明细归属关系错误");
+            }
+
+            if (item.getProductId() == null || item.getProductId() <= 0) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,
+                        "订单明细商品ID非法");
+            }
+
+            if (item.getQuantity() == null || item.getQuantity() <= 0) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,
+                        "订单明细数量非法，productId=" + item.getProductId());
+            }
+
+            if (!StringUtils.hasText(item.getSkuCode())) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,
+                        "订单明细SKU快照为空，productId=" + item.getProductId());
+            }
+
+            if (!productIds.add(item.getProductId())) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,
+                        "订单存在重复商品明细，productId=" + item.getProductId());
+            }
+        }
+    }
+    private void validateOrderItemSummary(
+            OrderInfo orderInfo,
+            List<OrderItem> orderItems) {
+
+        int calculatedTotalQuantity = 0;
+        long calculatedTotalAmount = 0L;
+
+        try {
+            for (OrderItem item : orderItems) {
+                long expectedItemAmount = Math.multiplyExact(
+                        item.getSalePrice(),
+                        item.getQuantity().longValue()
+                );
+
+                if (!Objects.equals(item.getItemAmount(), expectedItemAmount)) {
+                    throw new BusinessException(ErrorCode.SYSTEM_ERROR,
+                            "订单明细金额不一致，productId=" + item.getProductId());
+                }
+
+                calculatedTotalQuantity = Math.addExact(
+                        calculatedTotalQuantity,
+                        item.getQuantity()
+                );
+
+                calculatedTotalAmount = Math.addExact(
+                        calculatedTotalAmount,
+                        item.getItemAmount()
+                );
+            }
+        } catch (ArithmeticException exception) {
+            throw new BusinessException(
+                    ErrorCode.SYSTEM_ERROR,
+                    "订单明细汇总计算溢出",
+                    exception
+            );
+        }
+
+        if (!Objects.equals(
+                orderInfo.getTotalQuantity(),
+                calculatedTotalQuantity)) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,
+                    "订单明细总数量与订单主表不一致");
+        }
+
+        if (!Objects.equals(
+                orderInfo.getTotalAmount(),
+                calculatedTotalAmount)) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,
+                    "订单明细总金额与订单主表不一致");
+        }
+    }
+
+
+    /**
+     * 插入流水
+     */
+    private void createAndPersistStockFlows(Long buyerId,
+                                            List<ProductStock> productStocks,
+                                            Map<Long, OrderItem>  orderItemByProductId,
+                                            OrderCancelContext orderCancelContext) {
+        List<StockFlow>  stockFlows = new ArrayList<>(productStocks.size());
+        String orderNo = orderCancelContext.orderNo();
+        LocalDateTime now = orderCancelContext.now();
+        for (ProductStock productStock : productStocks) {
+            Long productId = productStock.getProductId();
+            OrderItem orderItem = orderItemByProductId.get(productId);
+            Integer quantity = orderItem.getQuantity();
+            StockFlow stockFlow = new StockFlow();
+            stockFlow.setId(IdWorker.getId());
+            stockFlow.setProductId(productId);
+            stockFlow.setSkuCode(orderItem.getSkuCode());
+            stockFlow.setBizNo(orderNo);
+            stockFlow.setBizType(StockFlowBizType.ORDER_CANCEL_ROLLBACK.getCode());
+            stockFlow.setChangeQuantity(quantity);
+            stockFlow.setBeforeQuantity(productStock.getAvailableQuantity() - quantity);
+            stockFlow.setAfterQuantity(productStock.getAvailableQuantity());
+            stockFlow.setOperatorType(OperatorType.USER.getCode());
+            stockFlow.setOperatorId(buyerId);
+            stockFlow.setRemark(orderCancelContext.orderCancelRequest().cancelReason());
+            stockFlow.setCreateTime(now);
+            stockFlow.setUpdateTime(now);
+            stockFlows.add(stockFlow);
+        }
+        int insertedFlowRows = stockFlowMapper.batchInsert(stockFlows);
+        assertAffectedRows(stockFlows,insertedFlowRows);
+    }
+
+    /**
+     * 锁库存，内存获取回滚后的库存信息
+     * @param
+     * @return
+     */
+    private List<ProductStock> loadAndLockProductStock(
+            Map<Long, OrderItem> orderItemByProductId){
+        List<Long> productIds = orderItemByProductId.keySet()
+                .stream()
+                .sorted()
+                .toList();
+        if(productIds.size()==0){
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND,
+                    "商品不存在");
+        }
+        List<ProductStock> lockedStockSnapshots =
+                productStockMapper.selectByProductIdsForUpdate(productIds);
+        validateLockedStocks(orderItemByProductId, lockedStockSnapshots);
+        List<ProductStock> productStocks = lockedStockSnapshots
+                .stream().map(productStock -> {
+            Long productId = productStock.getProductId();
+            int changeQuantity = orderItemByProductId.get(productId).getQuantity();
+            int beforeQuantity = productStock.getAvailableQuantity();
+            Integer totalOutQuantity = productStock.getTotalOutQuantity();
+            if (totalOutQuantity < changeQuantity) {
+                throw new BusinessException(
+                        ErrorCode.CONCURRENT_UPDATE_FAILED,
+                        "累计出库量小于订单回补量"
+                );
+            }
+            /**
+             * 风险：
+             * 历史库存异常时，total_out_quantity < quantity 会产生负数。
+             * availableQuantity 接近 Integer.MAX_VALUE 时，加法会溢出为负数。
+             * Java int 溢出不会抛异常，只会按补码截断。
+             * 数据库没有非负 CHECK 约束，错误值可以落库。
+             */
+            int afterAvailable;
+            int afterTotalOut;
+            try {
+                afterAvailable = Math.addExact(beforeQuantity, changeQuantity);
+                afterTotalOut = Math.subtractExact(totalOutQuantity, changeQuantity);
+            }catch (ArithmeticException exception){
+                throw new BusinessException(
+                        ErrorCode.PARAM_ERROR,
+                        "回补后库存量超出范围或累计累计出库量小于回补量",
+                        exception
+                );
+            }
+
+            productStock.setTotalOutQuantity(afterTotalOut);
+            productStock.setAvailableQuantity(afterAvailable);
+            return productStock;
+        }).toList();
+
+        return productStocks;
+    }
+
+
+
+
+    private OrderInfo markOrderCancelled(OrderCancelContext orderCancelContext){
+        /**
+         * 这里其实直接使用mybatis自带的updateById,使用乐观锁也可以实现高并发修改
+         * 这种依赖存在以下隐患：
+         * 后续改成自定义 Mapper SQL 时忘记加 version。
+         * 实体查询没有查出 version。
+         * 乐观锁插件配置被移除或失效。
+         * 其他服务、脚本直接更新订单，没有经过当前 Service。
+         * 后续新增新的订单状态，Java 判断遗漏。
+         * 阅读 SQL 时无法直接确认状态迁移是否合法。
+         * 生产核心状态机应该使用业务条件进行第一层保护，乐观锁可以作为附加保护，而不应该替代状态条件。
+         */
+        int affectedOrderRows = orderInfoMapper.cancelCreatedOrder(
+                orderCancelContext.orderNo(),
+                OrderStatus.CANCELLED.getCode(),
+                OrderStatus.CREATED.getCode(),
+                orderCancelContext.orderCancelRequest().cancelReason(),
+                orderCancelContext.now()
+                );
+        //这里如果返回值为0 有两种可能， ①订单不存在  ②状态有问题
+        OrderInfo currentOrder =  orderInfoMapper.selectOne(
+                new LambdaQueryWrapper<OrderInfo>().eq(OrderInfo::getOrderNo, orderCancelContext.orderNo())
+        );
+        if (affectedOrderRows != 1) {
+
+
+            if (currentOrder == null) {
+                throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+            }
+
+            OrderStatus status
+                    = OrderStatus.findByCode(currentOrder.getOrderStatus()).get();
+            if (status == null || !status.canCancel()) {
+                throw new BusinessException(ErrorCode.ORDER_STATUS_INVALID);
+            }
+
+            throw new BusinessException(ErrorCode.CONCURRENT_UPDATE_FAILED);
+        }
+        return currentOrder;
+    }
+
+
 
 
     private OrderCreationContext loadCreationContext(List<OrderCreateItemRequest> sortedItems,

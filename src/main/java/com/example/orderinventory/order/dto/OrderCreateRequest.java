@@ -28,6 +28,7 @@ import java.util.Objects;
 public record OrderCreateRequest(
 
         @NotNull(message = "客户端请求号不能为空")
+        @Positive(message = "客户端请求号必须大于0")
         Long requestId,
 
         @NotNull(message = "用户ID不能为空")
