@@ -91,7 +91,8 @@ public class ProductServiceImpl  extends ServiceImpl<ProductMapper, Product> imp
                         .or()
                         .like(Product::getSkuCode , keyword))
                 .eq(productStatus!=null , Product::getProductStatus , productStatus)
-                .orderByDesc(Product::getCreateTime);
+                .orderByDesc(Product::getCreateTime)
+                .orderByDesc(Product::getId);
         Page<Product> productPage = new Page<>(pageNo, pageSize);
         productPage = baseMapper.selectPage(productPage, queryWrapper);
         List<ProductVO> productVoList = productPage.getRecords().stream()

@@ -120,7 +120,8 @@ public class StockServiceImpl implements StockService {
                         ,query.startTime()
                         ,query.endTime()
                 )
-                .orderByDesc(StockFlow::getCreateTime);
+                .orderByDesc(StockFlow::getCreateTime)
+                .orderByDesc(StockFlow::getId);
         Page<StockFlow> stockFlowPage = new Page<>(pageNo, pageSize);
         stockFlowPage = stockFlowMapper
                 .selectPage(stockFlowPage, queryWrapper);
