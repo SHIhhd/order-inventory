@@ -2,6 +2,7 @@ package com.example.orderinventory.common.enums;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -35,14 +36,9 @@ public enum OperatorType {
         return message;
     }
 
-    public static OperatorType fromCode(Integer code) {
-        if (code == null) {
-            return null;
-        }
-        return CODE_MAP.get(code);
+    public static Optional<OperatorType> findByCode(Integer code) {
+        return Optional.ofNullable(code)
+                .map(CODE_MAP::get);
     }
 
-    public static boolean isValidCode(Integer code) {
-        return fromCode(code) != null;
-    }
 }

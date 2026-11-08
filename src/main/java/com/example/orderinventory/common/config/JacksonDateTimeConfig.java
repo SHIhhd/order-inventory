@@ -1,5 +1,6 @@
 package com.example.orderinventory.common.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
@@ -20,6 +21,7 @@ import java.time.format.DateTimeFormatter;
  * @author 我他妈莱纳
  * @date 2026/7/15 15:23
  * @description 类的详细说明
+ * 定制 Spring Boot 使用的 Jackson，让 Java 对象与 JSON 之间的转换遵守项目约定。
  */
 @Configuration
 public class JacksonDateTimeConfig {
@@ -30,9 +32,13 @@ public class JacksonDateTimeConfig {
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer localDateTimeCustomizer() {
         return builder -> {
+            //序列化
             builder.serializers(
                     new LocalDateTimeSerializer(DATE_TIME_FORMATTER)
             );
+            builder.featuresToDisable(
+                    DeserializationFeature.ACCEPT_FLOAT_AS_INT);
+            //反序列化
             builder.deserializers(
                     new LocalDateTimeDeserializer(DATE_TIME_FORMATTER)
             );

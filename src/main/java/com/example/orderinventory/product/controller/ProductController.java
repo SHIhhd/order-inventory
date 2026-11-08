@@ -58,10 +58,10 @@ public class ProductController {
 
     @GetMapping
     public ApiResult<PageResult<ProductVO>> getProductPage(@Valid ProductPageRequest productPageRequest){
-        PageResult<ProductVO> pageResult = productService.getProductPage(productPageRequest.getPageNo(),
-                productPageRequest.getPageSize(),
-                productPageRequest.getKeyword(),
-                productPageRequest.getProductStatus());
+        PageResult<ProductVO> pageResult = productService.getProductPage(productPageRequest.pageNo(),
+                productPageRequest.pageSize(),
+                productPageRequest.keyword(),
+                productPageRequest.productStatus());
 
         return ApiResult.success(pageResult);
     }

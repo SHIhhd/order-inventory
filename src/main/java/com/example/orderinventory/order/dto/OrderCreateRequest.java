@@ -57,6 +57,16 @@ public record OrderCreateRequest(
     private  boolean isProductIdUnique(){
         /**
          * 【学习】
+         * 即使上面有@NotEmpty(message = "商品明细不能为空")
+         * 这里也要判断 kong 的情况
+         * 不会因为某个校验“不通过”就自动停止后续校验。
+         */
+        if (items == null || items.isEmpty()) {
+            return true;
+        }
+
+        /**
+         * 【学习】
          * 默认情况下 Bean Validation 会尽量执行所有适用的约束，
          * 不会因为某个校验“不通过”就自动停止后续校验。
          * 空集合由 @NotEmpty 负责，避免重复错误信息
