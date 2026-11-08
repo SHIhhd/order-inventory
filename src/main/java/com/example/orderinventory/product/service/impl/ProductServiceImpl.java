@@ -78,7 +78,7 @@ public class ProductServiceImpl  extends ServiceImpl<ProductMapper, Product> imp
                                                   String keyword, Integer productStatus) {
 
         if (productStatus == null
-                || !ProductStatus.isValidCode(productStatus)){
+                && !ProductStatus.isValidCode(productStatus)){
             throw new BusinessException(ErrorCode.PRODUCT_STATUS_INVALID,
                     "productStatus must be 0 or 1");
         }

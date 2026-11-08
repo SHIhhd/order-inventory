@@ -20,6 +20,7 @@ public enum ErrorCode {
     STOCK_ALREADY_EXISTS(HttpStatus.CONFLICT, "库存记录已存在"),
     STOCK_FLOW_ALREADY_EXISTS(HttpStatus.CONFLICT, "库存流水已存在"),
     STOCK_NOT_ENOUGH(HttpStatus.CONFLICT, "库存不足"),
+    STOCK_FLOW_TYPE_INVALID(HttpStatus.CONFLICT, "库存流水单号状态非法"),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "订单不存在"),
     ORDER_STATUS_INVALID(HttpStatus.CONFLICT, "订单状态非法"),
     ORDER_ITEM_EMPTY(HttpStatus.BAD_REQUEST, "订单明细不能为空"),

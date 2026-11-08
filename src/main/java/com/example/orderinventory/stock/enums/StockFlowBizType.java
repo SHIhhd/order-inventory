@@ -2,6 +2,7 @@ package com.example.orderinventory.stock.enums;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,14 +35,11 @@ public enum StockFlowBizType {
         return message;
     }
 
-    public static StockFlowBizType fromCode(Integer code) {
-        if (code == null) {
-            return null;
-        }
-        return CODE_MAP.get(code);
+
+    public static Optional<StockFlowBizType> findByCode(Integer code) {
+        return Optional.ofNullable(code)
+                .map(CODE_MAP::get);
     }
 
-    public static boolean isValidCode(Integer code) {
-        return fromCode(code) != null;
-    }
+
 }

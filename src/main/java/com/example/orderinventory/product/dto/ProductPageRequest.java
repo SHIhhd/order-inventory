@@ -3,8 +3,6 @@ package com.example.orderinventory.product.dto;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * 请遵循六道之力
@@ -19,24 +17,34 @@ import lombok.Setter;
  * @date 2026/7/5 21:09
  * @description 类的详细说明
  */
-@Getter
-@Setter
-public class ProductPageRequest {
+public record ProductPageRequest(
 
     /**
      * 【学习】
      * @Min 和  @Max 不会对 null 进行校验
      */
     @Min(value = 1, message = "pageNo must be greater than or equal to 1")
-    private Integer pageNo = 1;
+    Integer pageNo,
 
     @Min(value = 1, message = "pageSize must be greater than or equal to 1")
     @Max(value = 100, message = "pageSize must be less than or equal to 100")
-    private Integer pageSize = 10;
+    Integer pageSize,
 
-    private String keyword;
+    String keyword,
 
-    private Integer productStatus;
+    Integer productStatus
+) {
+    private static final int DEFAULT_PAGE_NO = 1;
+    private static final int DEFAULT_PAGE_SIZE = 10;
+
+    /**
+     * 【学习】
+     * 未传或传空的分页参数在校验前补齐默认值。
+     */
+    public ProductPageRequest {
+        pageNo = pageNo == null ? DEFAULT_PAGE_NO : pageNo;
+        pageSize = pageSize == null ? DEFAULT_PAGE_SIZE : pageSize;
+    }
 
     /**
      *  【学习】

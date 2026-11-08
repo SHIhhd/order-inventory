@@ -1,10 +1,14 @@
 package com.example.orderinventory.stock.controller;
 
 import com.example.orderinventory.common.result.ApiResult;
+import com.example.orderinventory.common.result.PageResult;
+import com.example.orderinventory.stock.dto.StockFlowPageRequest;
 import com.example.orderinventory.stock.dto.StockInitRequest;
-import com.example.orderinventory.stock.vo.ProductStockVO;
 import com.example.orderinventory.stock.service.StockService;
+import com.example.orderinventory.stock.vo.ProductStockVO;
+import com.example.orderinventory.stock.vo.StockFlowResponse;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @description 类的详细说明
  */
 @RestController
-@RequestMapping("/api/v1/stocks")
+@RequestMapping("/api/v1")
 public class StockController {
 
     private final StockService stockService;
@@ -34,9 +38,16 @@ public class StockController {
     }
 
 
-    @PostMapping("/init")
+    @PostMapping("/stocks/init")
     public ApiResult<ProductStockVO> initStock(@Valid @RequestBody StockInitRequest stockInitRequest){
         ProductStockVO productStockVO = stockService.initStock(stockInitRequest);
         return ApiResult.success(productStockVO);
+    }
+
+    @GetMapping("/stock-flows")
+    public ApiResult<PageResult<StockFlowResponse>> pageStockFlows(
+            @Valid StockFlowPageRequest query
+    ) {
+        return ApiResult.success(stockService.pageStockFlows(query));
     }
 }

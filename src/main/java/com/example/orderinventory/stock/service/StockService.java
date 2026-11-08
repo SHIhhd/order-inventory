@@ -1,7 +1,10 @@
 package com.example.orderinventory.stock.service;
 
+import com.example.orderinventory.common.result.PageResult;
+import com.example.orderinventory.stock.dto.StockFlowPageRequest;
 import com.example.orderinventory.stock.dto.StockInitRequest;
 import com.example.orderinventory.stock.vo.ProductStockVO;
+import com.example.orderinventory.stock.vo.StockFlowResponse;
 
 /**
 * @author Administrator
@@ -11,4 +14,6 @@ import com.example.orderinventory.stock.vo.ProductStockVO;
 public interface StockService {
 
     ProductStockVO initStock(StockInitRequest stockInitRequest);
+
+    PageResult<StockFlowResponse> pageStockFlows(StockFlowPageRequest query);
 }

@@ -12,6 +12,11 @@ import lombok.Data;
 @TableName(value ="stock_flow")
 @Data
 
+/**
+ * todo  审计流水使用逻辑删除需要重新确认业务语义
+ * 库存流水一般属于不可变审计记录。允许逻辑删除可能导致排查库存时看不到真实历史
+ * 具体修改方法可见 库存流水属于审计数据-修改逻辑.md
+ */
 public class StockFlow extends BaseEntity {
     /**
      * 商品ID，对应product.id
